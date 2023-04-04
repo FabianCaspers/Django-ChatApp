@@ -3,12 +3,9 @@
 <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
 
 <style>
-
-.page-content {
-    padding: 100px 100px;
-}
-
-
+    .page-content {
+        padding: 100px 100px;
+    }
 </style>
 
 <!-- Always shows a header, even in smaller screens. -->
@@ -16,7 +13,13 @@
     <header class="mdl-layout__header">
         <div class="mdl-layout__header-row">
             <!-- Title -->
-            <span class="mdl-layout-title">Welcome, {{ request.user.first_name }}! </span>
+            <span class="mdl-layout-title">
+                {% if request.user.is_authenticated %}
+                Welcome, {{ request.user.first_name }}!
+                {% else %}
+                Welcome, Please log in!
+                {% endif %}
+             </span>
             <!-- Add spacer, to align navigation to the right -->
             <div class="mdl-layout-spacer"></div>
             <!-- Navigation. We hide it in small screens. -->
@@ -38,21 +41,37 @@
         </nav>
     </div>
     <main class="mdl-layout__content">
-        <div class="page-content" method="post">
-            {% csrf_token %}
-            <form action="/chat/">
+        <div class="page-content">
+
+            {% if request.user.is_authenticated %} 
+            {% for message in messages %}
+            <div>
+                <span class="color-gray">[{{ message.createt_at }}]</span> {{ message.author.first_name}} <i>{{ message.text }}</i>
+            </div>
+            {% endfor %}
+
+            <form action="/chat/" method="post">
+                {% csrf_token %}
                 <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-                  <input class="mdl-textfield__input" name="textmessage" type="text" id="sample3">
-                  <label class="mdl-textfield__label" for="sample3">Text...</label>
+                    <input class="mdl-textfield__input" name="textmessage" type="text" id="sample3">
+                    <label class="mdl-textfield__label" for="sample3">Text...</label>
                 </div>
 
                 <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
                     Send
                 </button>
-              </form>
+            </form>
 
-           
-            
+            {% else %}
+            <h1>Nicht eingeloggt</h1>
+            <p>Du bist aktuell nicht eingeloggt. Bitte Logge dich ein. <br>
+                Bitte klick <a href="/login/">hier</a>
+            </p>
+
+            {% endif %}
+
+
+
         </div>
     </main>
 </div>
