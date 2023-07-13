@@ -3,6 +3,13 @@ from .models import Message, Chat
 from django.http.response import HttpResponseRedirect
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import UserCreationForm
+from django.shortcuts import render, redirect
+from .forms import RegistrationForm
+from django.views.decorators.csrf import csrf_protect
+from django.contrib.auth.forms import UserCreationForm
+from django.shortcuts import redirect
+
 
 # Create your views here.
 @login_required(login_url='/login/')
@@ -27,3 +34,21 @@ def login_view(request):
         else:
             return render(request, 'auth/login.html', {'wrongPassword': True, 'redirect': redirect})
     return render(request, 'auth/login.html', {'redirect': redirect})
+
+
+
+
+@csrf_protect
+def register_view(request):
+    redirect_to_login = '/login/'
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect(redirect_to_login)
+    else:
+        form = UserCreationForm()
+    return render(request, 'auth/register.html', {'form': form})
+
+
+
