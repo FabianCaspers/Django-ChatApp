@@ -1,28 +1,46 @@
 {% extends 'base.html' %}
 {% block content %}
   {% if request.user.is_authenticated %}
-    {% for message in messages %}
-      <div>
-        <span class="color-gray">[{{ message.createt_at }}]</span> {{ message.author.first_name }}: <i>{{ message.text }}</i>
-      </div>
-    {% endfor %}
+    <div id="messageContainer">
+      {% for message in messages %}
+        <div>
+          <span class="color-gray">[{{ message.createt_at }}]</span> {{ message.author.first_name }}: <i>{{ message.text }}</i>
+        </div>
+      {% endfor %}
+    </div>
 
     <script>
       async function sendMessage() {
         let fd = new FormData();
         let token = '{{ csrf_token }}';
+        let current_date = '{{ current_date|date:"d F Y" }}'; // Verwende den "date" Filter, um das Datum im deutschen Format zu rendern
         fd.append('textmessage', messageField.value);
-        fd.append('csrfmiddlewaretoken', token );
+        fd.append('csrfmiddlewaretoken', token);
         try {
+          messageContainer.innerHTML += `
+            <div id="deleteMessage">
+              <span class="color-gray">[${current_date}]</span> {{ request.user.first_name }}: <i class="color-gray">${messageField.value}</i>
+            </div>`;
+      
           await fetch('/chat/', {
             method: 'POST',
             body: fd
-          })
+          });
+    
+          document.getElementById('deleteMessage').remove();
+          messageContainer.innerHTML += `
+            <div>
+              <span class="color-gray">[${current_date}]</span> {{ request.user.first_name }}: <i>${messageField.value}</i>
+            </div>`;
         } catch (e) {
-          console.error('An error occured', e)
+          console.error('An error occurred', e);
         }
       }
     </script>
+    
+    
+    
+    
 
     <form onsubmit="sendMessage(); return false;" method="post">
       {% csrf_token %}

@@ -9,19 +9,24 @@ from .forms import RegistrationForm
 from django.views.decorators.csrf import csrf_protect
 from django.contrib.auth.forms import UserCreationForm
 from django.shortcuts import redirect
+from datetime import datetime
+
+
+
 
 
 # Create your views here.
 @login_required(login_url='/login/')
 def index(request):
     chatMessages = None
+    current_date = datetime.now()  
     if request.method == 'POST':
-        print("Reveived data " + request.POST['textmessage'])
+        print("Received data " + request.POST['textmessage'])
         myChat = Chat.objects.get(id=1)
         author = request.user
         Message.objects.create(text=request.POST['textmessage'], chat=myChat, author=request.user, receiver=author)
         chatMessages = Message.objects.filter(chat__id=1)
-    return render(request, 'chat/index.html', {'messages': chatMessages})
+    return render(request, 'chat/index.html', {'messages': chatMessages, 'current_date': current_date})
 
 
 def login_view(request):
