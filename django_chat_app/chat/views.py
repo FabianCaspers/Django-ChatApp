@@ -10,7 +10,8 @@ from django.views.decorators.csrf import csrf_protect
 from django.contrib.auth.forms import UserCreationForm
 from django.shortcuts import redirect
 from datetime import datetime
-
+from django.core import serializers
+from django.http import JsonResponse
 
 
 
@@ -24,9 +25,12 @@ def index(request):
         print("Received data " + request.POST['textmessage'])
         myChat = Chat.objects.get(id=1)
         author = request.user
-        Message.objects.create(text=request.POST['textmessage'], chat=myChat, author=request.user, receiver=author)
-        chatMessages = Message.objects.filter(chat__id=1)
+        new_message = Message.objects.create(text=request.POST['textmessage'], chat=myChat, author=request.user, receiver=author)
+        serialized_obj = serializers.serialize('json', [new_message, ])
+        return JsonResponse(serialized_obj[1:-1], safe=False)
+    chatMessages = Message.objects.filter(chat__id=1)
     return render(request, 'chat/index.html', {'messages': chatMessages, 'current_date': current_date})
+
 
 
 def login_view(request):
